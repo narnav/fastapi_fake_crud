@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car CRUD with FastAPI and Axios</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            background: #f4f4f4;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Car Management</h1>
+
+    <!-- Form to create a new car -->
+    <h2>Add New Car</h2>
+    <form id="addCarForm">
+        <input type="text" id="color" placeholder="Color" required />
+        <input type="text" id="brand" placeholder="Brand" required />
+        <input type="number" id="price" placeholder="Price" required />
+        <button type="submit">Add Car</button>
+    </form>
+
+    <!-- List of cars -->
+    <h2>Car List</h2>
+    <ul id="carList"></ul>
+
+    <script>
+        // Set the base URL for your FastAPI backend
+        const API_URL = "http://localhost:8000/cars/";
+
+        // Fetch all cars and display them
+        function fetchCars() {
+            axios.get(API_URL)
+                .then(response => {
+                    const carList = document.getElementById("carList");
+                    carList.innerHTML = ""; // Clear the list first
+                    response.data.forEach((car, index) => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `${car.brand} - ${car.color} - $${car.price}`;
+                        carList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching cars:', error);
+                });
+        }
+
+        // Handle form submission to add a new car
+        document.getElementById("addCarForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const car = {
+                color: document.getElementById("color").value,
+                brand: document.getElementById("brand").value,
+                price: parseFloat(document.getElementById("price").value),
+            };
+            console.log(car);
+            
+            // Send POST request to add the new car
+            axios.post(API_URL, car)
+                .then(response => {
+                    console.log('Car added:', response.data);
+                    fetchCars(); // Refresh the car list
+                })
+                .catch(error => {
+                    console.error('Error adding car:', error);
+                });
+
+            // Clear the form fields
+            document.getElementById("color").value = '';
+            document.getElementById("brand").value = '';
+            document.getElementById("price").value = '';
+        });
+
+        // Fetch cars when the page loads
+        window.onload = fetchCars;
+    </script>
+
+</body>
+</html>
